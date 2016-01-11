@@ -2,16 +2,16 @@
     <div class="row fund-item-header-row">
         <div class="col-sm-8">
             <div class="fund-item-header">
-                <div>{{fund.name}}</div>
+                <div class="fund-name">{{fund.name | emptyDash }}</div>
                 <div class="fund-item-sub-header">
-                    {{fund['Classification Taxonomy Id']}}
+                    {{fund['Classification Taxonomy Id'] | emptyDash}}
                 </div>
             </div>
         </div>
         <div class="col-sm-4">
             <div class="form-group form-inline  pull-right">
                 <label for="shareClassSelector">Share Class</label>
-                <select id="shareClassSelector" class="form-control" ng-model="fund.selectedShareClass" ng-change="fund.getChartData()"
+                <select id="shareClassSelector" class="form-control share-classes" ng-model="fund.selectedShareClass"
                         ng-options="shareClass['Short Name'] for shareClass in fund.shareClasses"></select>
             </div>
         </div>
@@ -25,8 +25,10 @@
         </tr>
         <tr ng-repeat="fundTableRow in fundTableRows" >
             <td ng-repeat-start="column in fundTableRow" ng-bind="!column.isBlank ? column.displayText || column.key : ''"></td>
-            <td ng-repeat-end>
-                <fund-list-item-field ng-if="!column.isBlank" type="{{column.type}}" date-format="{{column.dateFormat}}" value="fund[column.key]"></fund-list-item-field>
+            <td class="fund-field" ng-repeat-end>
+                <fund-list-item-field data-key="{{column.key}}" ng-if="!column.isBlank" type="{{column.type}}"
+                                      date-format="{{column.dateFormat}}"
+                                      value="fund[column.key]"></fund-list-item-field>
             </td>
         </tr>
         <tr ng-hide="fund.selectedShareClass.isOverYearThreshold">
@@ -34,32 +36,39 @@
                 <h4>Share Class Details</h4>
             </td>
         </tr>
-        <tr ng-repeat="shareClassTableRow in shareClassTableRows" ng-hide="fund.selectedShareClass.isOverYearThreshold">
+        <tr class="shared-class-table-row" ng-repeat="shareClassTableRow in shareClassTableRows"
+            ng-hide="fund.selectedShareClass.isOverYearThreshold">
             <td ng-repeat-start="column in shareClassTableRow" ng-bind="!column.isBlank ? column.displayText || column.key : ''"></td>
-            <td ng-repeat-end>
-                <fund-list-item-field ng-if="!column.isBlank" type="{{column.type}}" date-format="{{column.dateFormat}}" value="fund.selectedShareClass[column.key]"></fund-list-item-field>
+            <td class="shared-class-field" ng-repeat-end>
+                <fund-list-item-field data-key="{{column.key}}" ng-if="!column.isBlank" type="{{column.type}}"
+                                      date-format="{{column.dateFormat}}"
+                                      value="fund.selectedShareClass[column.key]"></fund-list-item-field>
             </td>
         </tr>
         </tbody>
     </table>
-    <div class="col-sm-12"  ng-show="fund.selectedShareClass.isOverYearThreshold">
+    <div class="col-sm-12 share-class-list" ng-show="fund.selectedShareClass.isOverYearThreshold">
         <h4>Share Class Details</h4>
         <ul>
             <li ng-repeat="shareClassField in shareClassFields">
                 <span ng-bind="shareClassField.displayText || shareClassField.key"></span>:&nbsp;
                 <span>
-                    <fund-list-item-field type="{{shareClassField.type}}" date-format="{{shareClassField.dateFormat}}" value="fund.selectedShareClass[shareClassField.key]"></fund-list-item-field>
+                    <fund-list-item-field data-key="{{column.key}}" type="{{shareClassField.type}}"
+                                          date-format="{{shareClassField.dateFormat}}"
+                                          value="fund.selectedShareClass[shareClassField.key]"></fund-list-item-field>
                 </span>
             </li>
         </ul>
     </div>
 
     <div>
-        <div ng-hide="fund.invalidIsinCode">
+        <div class="chart-container" ng-hide="fund.chartDataErrorResponse">
             <highchart config="fund.chartConfig"></highchart>
         </div>
-        <div ng-show="fund.invalidIsinCode">
-            <div class="alert alert-danger" role="alert">ISIN Code is invalid</div>
+        <div class="isin-error-container" ng-show="fund.chartDataErrorResponse">
+            <div class="alert alert-danger" role="alert">Error getting chart data:
+                {{fund.chartDataErrorResponse.message}}
+            </div>
         </div>
     </div>
 

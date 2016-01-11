@@ -1,11 +1,11 @@
 <span>
-    <span class="form-control-static" ng-if="type == 'date'">
+    <span class="item-value form-control-static" ng-if="type == 'date'">
         {{ value | date:(dateFormat || 'dd MMM yyyy') | emptyDash }}
     </span>
-    <span class="form-control-static" ng-if="type == 'number'">
+    <span class="item-value form-control-static" ng-if="type == 'number'">
         {{ value | number:2 | emptyDash}}
     </span>
-    <span class="form-control-static" ng-if="!type">
+    <span class="item-value form-control-static" ng-if="!type">
         {{ value | emptyDash }}
     </span>
 </span>
