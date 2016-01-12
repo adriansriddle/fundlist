@@ -1,25 +1,12 @@
 angular.module('funds').controller('ListCtrl', function ($scope, fundService) {
-
-
-    // Used to orchestrate the fund data to set the selected share class
-    // and any additional manipulation of the data that is needed
-    function orchestrate(funds) {
-        angular.forEach(funds, function (fund) {
-
+    // calls to the service and loads the funds into the scope
+    $scope.loadFunds = function () {
+        // fetch the funds from the backend to render the page
+        fundService.getFunds().success(function (response) {
+            // load the fund data into the scope to be used on the front end
+            $scope.funds = response.funds;
         });
-        return funds;
-    }
+    };
 
-
-
-
-    // Fetch the funds from the backend to render the page
-    fundService.getFunds().success(function (response) {
-        // Load the fund data into the scope to be used on the front end
-        $scope.funds = orchestrate(response.funds);
-    });
-
-
-
-
+    $scope.loadFunds();
 });

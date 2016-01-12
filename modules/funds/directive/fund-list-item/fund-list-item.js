@@ -3,9 +3,9 @@ angular.module('funds').directive('fundListItem', function() {
 		restrict: 'E',
 		replace: false,
 		scope: {
-			fund: '='
+			fund: '=' // This is the main data point for the directive, the fund will drive the directive
 		},
-		controller: 'fundListItemController',
+		controller: 'FundListItemCtrl',
 		templateUrl: 'modules/funds/directive/fund-list-item/fund-list-item.html',
 		link: function($scope) {
 

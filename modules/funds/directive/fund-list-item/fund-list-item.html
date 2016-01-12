@@ -1,4 +1,5 @@
 <div class="fund-item">
+    <!-- Fund header element: start -->
     <div class="row fund-item-header-row">
         <div class="col-sm-8">
             <div class="fund-item-header">
@@ -16,6 +17,8 @@
             </div>
         </div>
     </div>
+    <!-- Fund header element: end -->
+    <!-- Fund details table: start -->
     <table class="table table-striped">
         <tbody>
         <tr>
@@ -23,8 +26,9 @@
                 <h4>Fund Details</h4>
             </td>
         </tr>
-        <tr ng-repeat="fundTableRow in fundTableRows" >
-            <td ng-repeat-start="column in fundTableRow" ng-bind="!column.isBlank ? column.displayText || column.key : ''"></td>
+        <tr ng-repeat="fundTableRow in fundTableRows">
+            <td ng-repeat-start="column in fundTableRow"
+                ng-bind="!column.isBlank ? column.displayText || column.key : ''" class="field-name"></td>
             <td class="fund-field" ng-repeat-end>
                 <fund-list-item-field data-key="{{column.key}}" ng-if="!column.isBlank" type="{{column.type}}"
                                       date-format="{{column.dateFormat}}"
@@ -38,7 +42,8 @@
         </tr>
         <tr class="shared-class-table-row" ng-repeat="shareClassTableRow in shareClassTableRows"
             ng-hide="fund.selectedShareClass.isOverYearThreshold">
-            <td ng-repeat-start="column in shareClassTableRow" ng-bind="!column.isBlank ? column.displayText || column.key : ''"></td>
+            <td ng-repeat-start="column in shareClassTableRow"
+                ng-bind="!column.isBlank ? column.displayText || column.key : ''" class="field-name"></td>
             <td class="shared-class-field" ng-repeat-end>
                 <fund-list-item-field data-key="{{column.key}}" ng-if="!column.isBlank" type="{{column.type}}"
                                       date-format="{{column.dateFormat}}"
@@ -47,11 +52,13 @@
         </tr>
         </tbody>
     </table>
+    <!-- Fund details table: end -->
+    <!-- Share Class details list start -->
     <div class="col-sm-12 share-class-list" ng-show="fund.selectedShareClass.isOverYearThreshold">
         <h4>Share Class Details</h4>
         <ul>
             <li ng-repeat="shareClassField in shareClassFields">
-                <span ng-bind="shareClassField.displayText || shareClassField.key"></span>:&nbsp;
+                <span ng-bind="shareClassField.displayText || shareClassField.key" class="field-name"></span>:&nbsp;
                 <span>
                     <fund-list-item-field data-key="{{column.key}}" type="{{shareClassField.type}}"
                                           date-format="{{shareClassField.dateFormat}}"
@@ -60,7 +67,8 @@
             </li>
         </ul>
     </div>
-
+    <!-- Share Class details list end -->
+    <!-- Chart section start -->
     <div>
         <div class="chart-container" ng-hide="fund.chartDataErrorResponse">
             <highchart config="fund.chartConfig"></highchart>
@@ -71,6 +79,5 @@
             </div>
         </div>
     </div>
-
-
+    <!-- Chart section end -->
 </div>

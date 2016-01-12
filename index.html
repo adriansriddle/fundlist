@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html ng-app="fundlist">
 <head>
-    <title ng-bind="($title || 'Home')"></title>
+    <title ng-bind="($title || '')"></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="utf-8">
     <link href="app.less" type="text/css" rel="stylesheet/less">
@@ -46,7 +46,7 @@
 <div>
     <div id="content" class="container">
         <header>
-            <h1 class="page-header" ng-bind="($title || 'Home')"></h1>
+            <h1 class="page-header" ng-bind="($title || '')"></h1>
         </header>
         <div class="row">
             <div ui-view></div>

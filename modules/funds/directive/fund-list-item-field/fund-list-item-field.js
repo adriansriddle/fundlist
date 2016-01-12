@@ -3,7 +3,6 @@ angular.module('funds').directive('fundListItemField', function() {
 		restrict: 'E',
 		replace: false,
 		scope: {
-			displayText: '@',
 			value: '=',
 			type: '@',
 			dateFormat: '@'

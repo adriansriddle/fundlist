@@ -4,7 +4,7 @@ angular.module('fundlist').config(function($stateProvider, $urlRouterProvider) {
 
 
     /* Add New States Above */
-    $urlRouterProvider.otherwise('/home');
+    $urlRouterProvider.otherwise('/funds/list');
 
 });
 

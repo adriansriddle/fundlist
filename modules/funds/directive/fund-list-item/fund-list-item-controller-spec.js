@@ -1,5 +1,5 @@
 /* global afterEach */
-describe('fundListItem', function () {
+describe('FundListItemCtrl', function () {
     var chartData = {chart: ['1']};
     var chartDataUrl = '/data/chart.json';
 
@@ -421,24 +421,18 @@ describe('fundListItem', function () {
 
     beforeEach(module('templates', 'core', 'funds'));
 
-    var scope, compile, element, $httpBackend;
+    var scope, compile, controller, $httpBackend;
 
-    beforeEach(inject(function ($rootScope, $compile, _$httpBackend_) {
+    beforeEach(inject(function ($rootScope, $compile, $controller, _$httpBackend_) {
         scope = $rootScope.$new();
         compile = $compile;
-
+        loadFund();
         $httpBackend = _$httpBackend_;
         $httpBackend.when('GET', chartDataUrl).respond(chartData);
-        loadFund();
-        element = angular.element('<fund-list-item fund="fund"></fund-list-item>');
-
         $httpBackend.expectGET(chartDataUrl);
-
-        compile(element)(scope);
+        controller = $controller('FundListItemCtrl', {$scope: scope});
         scope.$digest();
         $httpBackend.flush();
-
-
     }));
 
     afterEach(function () {
@@ -446,130 +440,71 @@ describe('fundListItem', function () {
         $httpBackend.verifyNoOutstandingRequest();
     });
 
-
-    it('should be on the page', function () {
-        var baseElementByClass = element.find('.fund-item');
-        expect(baseElementByClass.length).toBe(1);
+    describe('setShareClassAge', function () {
+        it('should set the age of the share class and test the age is < 4 years, Launch Date: Today minus 7 days', function () {
+            var launchDate = moment().subtract(7, 'days').toDate();
+            var shareClass = {
+                'Launch Date': launchDate
+            };
+            scope.setShareClassAge(shareClass);
+            expect(shareClass.age).toEqual('7 days');
+            expect(shareClass.isOverYearThreshold).toBeFalsy();
+        });
+        it('should set the age of the share class and test the age is > 4 years, Launch Date: Today minus 4 years', function () {
+            var launchDate = moment().subtract(4, 'years').toDate();
+            var shareClass = {
+                'Launch Date': launchDate
+            };
+            scope.setShareClassAge(shareClass);
+            expect(shareClass.age).toEqual('4 years');
+            expect(shareClass.isOverYearThreshold).toBeTruthy();
+        });
     });
 
-    it('should have the name set', function () {
-        var nameField = element.find('.fund-name');
-        expect(nameField.text()).toEqual(scope.fund.name);
-    });
-
-    it('should have a share class drop down', function () {
-        var shareClassesSelector = element.find('select.share-classes');
-        expect(shareClassesSelector.length).toBe(1);
-    });
-
-    it('should have a share class drop down with all share classes listed', function () {
-        var shareClassesSelector = element.find('select.share-classes option');
-        expect(shareClassesSelector.length).toBe(scope.fund.shareClasses.length);
-    });
-
-    it('should have the first share class selected ', function () {
-        expect(scope.fund.selectedShareClass).toEqual(scope.fund.shareClasses[0]);
-    });
-
-    describe('Changing the selected share class', function () {
-        it('should fetch chart data', function () {
-            scope.fund.selectedShareClass = scope.fund.shareClasses[1];
+    describe('getFundChartDataForShareClass', function () {
+        it('should call the service and load the chart config', function () {
             $httpBackend.expectGET(chartDataUrl);
             scope.$digest();
+            scope.getFundChartDataForShareClass(scope.fund);
             $httpBackend.flush();
             expect(scope.fund.chartConfig.series.length).toBe(1);
         });
-        it('should show the chart for a valid isin and hide the isin error message', function () {
-            var chartContainer = element.find('.chart-container');
-            var isinErrorContainer = element.find('.isin-error-container');
-            // The first one is valid
-            scope.fund.selectedShareClass = scope.fund.shareClasses[0];
-            scope.$digest();
-            var isValid = scope.fund.selectedShareClass['ISIN Code'] !== 'GB00BGnotvalid';
-            expect(isValid).toBeTruthy();
-            expect(chartContainer.hasClass('ng-hide')).toBe(!isValid);
-            expect(isinErrorContainer.hasClass('ng-hide')).toBe(isValid);
-        });
-        it('should hide the chart for a invalid isin and show the isin error message', function () {
+    });
 
-            // The second one is invalid
-            scope.fund.selectedShareClass = scope.fund.shareClasses[1];
+    describe('convertDates', function () {
+        it('should convert the dates in the fund', function () {
+            loadFund();
+            var fund = scope.fund;
             $httpBackend.expectGET(chartDataUrl);
+            fund.selectedShareClass = fund.shareClasses && fund.shareClasses.length > 0 ? fund.shareClasses[0] : null;
             scope.$digest();
+            expect(scope.fund['Report Date From']).toEqual('2013-12-29 00:00:00.0');
+            scope.convertDates(scope.fund);
+            var dateFields = ['Report Date From', 'Report Date To', 'Launch Date', 'Net Assets Total Date', 'Last Update',
+                'Cumulative Return DateTime', 'Total Return DateTime'];
+            angular.forEach(dateFields, function (dateField) {
+                if (scope.fund[dateField]) {
+                    expect(scope.fund[dateField] instanceof Date).toBeTruthy();
+                }
+            });
             $httpBackend.flush();
-            var chartContainer = element.find('.chart-container');
-            var isinErrorContainer = element.find('.isin-error-container');
-            var isValid = scope.fund.selectedShareClass['ISIN Code'] !== 'GB00BGnotvalid';
-
-            expect(isValid).toBeFalsy();
-            expect(isinErrorContainer.hasClass('ng-hide')).toBe(isValid);
-            expect(chartContainer.hasClass('ng-hide')).toBe(!isValid);
         });
     });
-    describe('Change structure depending on Launch Date', function () {
-        it('should show share class fields as table elements if Launch date < 4 years ago', function () {
-            scope.fund.selectedShareClass['Launch Date'] = new Date();
-            scope.$digest();
-            var listElement = element.find('.share-class-list');
-            var tableElements = element.find('.shared-class-table-row:eq(0)');
 
-            expect(listElement.hasClass('ng-hide')).toBeTruthy();
-            expect(tableElements.hasClass('ng-hide')).toBeFalsy();
+    describe('getTableRowsForFields', function () {
+        it('should convert the fields into the expected table data format', function () {
+            var fields = [
+                {key: 'Entity Name'},
+                {key: 'ISIN Code'},
+                {key: 'Short Name'},
+                {key: 'Fund Size Currency Code'}
+            ];
+            var tableData = scope.getTableRowsForFields(fields);
+            expect(tableData).toBeDefined();
+            expect(tableData.length).toBe(2);
+            expect(tableData[0].length).toBe(2);
+            expect(tableData[0][0]).toEqual(fields[0]);
+            expect(tableData[1][1]).toEqual(fields[3]);
         });
-        it('should show share class fields as ul if Launch date >= 4 years ago', function () {
-            var now = new Date();
-            scope.fund.selectedShareClass['Launch Date'] = new Date(now.getFullYear() - 4, now.getMonth(), now.getDate());
-            scope.$digest();
-
-            var listElement = element.find('.share-class-list');
-            var tableElements = element.find('.shared-class-table-row:eq(0)');
-
-            expect(listElement.hasClass('ng-hide')).toBeFalsy();
-            expect(tableElements.hasClass('ng-hide')).toBeTruthy();
-        });
-    });
-    describe('Field validation', function () {
-        it('should have the Launch Date', function () {
-            var field = element.find('fund-list-item-field[data-key="Launch Date"] .item-value');
-            expect(field.length).toBe(1);
-        });
-        it('should display the launch date as MM/DD/YYYY', function () {
-            var field = element.find('fund-list-item-field[data-key="Launch Date"] .item-value');
-            var fieldText = field.text().trim();
-            var formattedDate = moment(scope.fund.selectedShareClass['Launch Date']).format('MM/DD/YYYY');
-            expect(fieldText).toEqual(formattedDate);
-        });
-        it('should display other dates as DD MMM YYYY (Report Date From)', function () {
-            var field = element.find('.shared-class-field fund-list-item-field[data-key="Report Date From"] .item-value');
-            var fieldText = field.text().trim();
-            var formattedDate = moment(scope.fund.selectedShareClass['Report Date From']).format('DD MMM YYYY');
-            expect(fieldText).toEqual(formattedDate);
-        });
-        it('should display blank fields as a dash', function () {
-            var field = element.find('.shared-class-field fund-list-item-field[data-key="Cumulative Return 2 Year"] .item-value');
-            var fieldText = field.text().trim();
-            expect(fieldText).toEqual('-');
-            scope.fund.selectedShareClass['Cumulative Return 2 Year'] = 1;
-            scope.$digest();
-            fieldText = field.text().trim();
-            expect(fieldText).toEqual('1.00');
-            scope.fund.selectedShareClass['Cumulative Return 2 Year'] = null;
-            scope.$digest();
-            fieldText = field.text().trim();
-            expect(fieldText).toEqual('-');
-        });
-        it('should display numbers with thousand separators and 2 decimal places', function () {
-            // This cater for thousand separators, 2 decimal fixed places and will work for negative numbers
-            var regex = /^(\-)?\d{1,3}(,\d{3})*(\.\d{2}){1}$/;
-            var field = element.find('.shared-class-field fund-list-item-field[data-key="NAV Base"] .item-value');
-            var fieldText = field.text().trim();
-            var isMatch = regex.test(fieldText);
-            expect(isMatch).toBeTruthy();
-            field = element.find('.shared-class-field fund-list-item-field[data-key="Compound Return 1 Year Annual"] .item-value');
-            fieldText = field.text().trim();
-            isMatch = regex.test(fieldText);
-            expect(isMatch).toBeTruthy();
-        });
-
     });
 });

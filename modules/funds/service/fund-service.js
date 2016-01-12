@@ -13,6 +13,15 @@ angular.module('funds').factory('fundService', function ($q, $http) {
         if (request.isin === 'GB00BGnotvalid') {
             deferred.reject({message: 'Invalid ISIN'});
         }
+        // validate the request contains the "from" property
+        if (!request.from) {
+            deferred.reject({message: 'Request needs to have a "from" parameter'});
+        }
+        // validate the request contains the "to" property
+        if (!request.to) {
+            deferred.reject({message: 'Request needs to have a "to" parameter'});
+        }
+
         // return the chart data using an ajax call
         $http.get('/data/chart.json').success(function (data) {
             deferred.resolve(data);
