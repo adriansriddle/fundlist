@@ -419,7 +419,7 @@ describe('FundListItemCtrl', function () {
         };
     }
 
-    beforeEach(module('templates', 'core', 'funds'));
+    beforeEach(module('core', 'funds'));
 
     var scope, compile, controller, $httpBackend;
 
