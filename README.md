@@ -5,7 +5,7 @@
 - Navigate to the project root
 - Run bower install
 - Run npm install
-- Run grunt serve to run the site
+- Run grunt serve to run the site (http://localhost:9001/)
 - Run grunt test to test the site
 
 # The task
