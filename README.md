@@ -1,5 +1,13 @@
 # KURTOSYS Front-end test
 
+# Initial Setup
+- Clone the repository
+- Navigate to the project root
+- Run bower install
+- Run npm install
+- Run grunt serve to run the site
+- Run grunt test to test the site
+
 # The task
 Create an angular application which shows the fund and *share class*es information on a page
 The page should have a list of funds where each fund has a dropdown to change *share class* on that specific fund. By default, the first *share class* is selected.
